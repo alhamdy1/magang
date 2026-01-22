@@ -2,7 +2,18 @@
 # This is an alternative to Dockerfile
 
 [phases.setup]
-nixPkgs = ['php82', 'php82Extensions.pdo', 'php82Extensions.pdo_pgsql', 'php82Extensions.pdo_sqlite', 'php82Extensions.mbstring', 'php82Extensions.gd', 'php82Extensions.xml', 'php82Extensions.bcmath', 'nodejs-18_x', 'npm-9_x']
+nixPkgs = [
+    'php82',
+    'php82Extensions.pdo',
+    'php82Extensions.pdo_pgsql',
+    'php82Extensions.pdo_sqlite',
+    'php82Extensions.mbstring',
+    'php82Extensions.gd',
+    'php82Extensions.xml',
+    'php82Extensions.bcmath',
+    'nodejs-18_x',
+    'npm-9_x'
+]
 
 [phases.install]
 cmds = [
@@ -18,4 +29,4 @@ cmds = [
 ]
 
 [start]
-cmd = 'php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-8080}'
+cmd = './railway-start.sh'
