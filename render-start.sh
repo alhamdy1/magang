@@ -46,9 +46,11 @@ if [ ! -L public/storage ]; then
     php artisan storage:link || true
 fi
 
-# Seed database if running for first time
-USER_COUNT=$(php artisan tinker --no-ansi --execute="try { echo \App\Models\User::count(); } catch (\Exception \$e) { echo '0'; }" 2>/dev/null | tr -d '\n' | grep -oE '[0-9]+' | head -1)
-if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
+# Seed database if running for first time (check if users table is empty)
+echo "Checking if database needs seeding..."
+if php artisan tinker --no-ansi --execute="exit(\App\Models\User::count() > 0 ? 0 : 1);" 2>/dev/null; then
+    echo "Database already has data, skipping seed..."
+else
     echo "Seeding database with initial data..."
     php artisan db:seed --force
 fi
