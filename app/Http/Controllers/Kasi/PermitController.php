@@ -44,7 +44,7 @@ class PermitController extends Controller
                 'level' => 'kasi',
                 'old_status' => 'operator_approved',
                 'new_status' => 'kasi_review',
-                'notes' => 'Permohonan direview oleh Kasi Perijinan',
+                'notes' => 'Permohonan direview oleh Kasi Perizinan',
             ]);
         }
 
@@ -79,7 +79,7 @@ class PermitController extends Controller
             'level' => 'kasi',
             'old_status' => 'kasi_review',
             'new_status' => 'kasi_approved',
-            'notes' => $request->notes ?? 'Disetujui oleh Kasi Perijinan',
+            'notes' => $request->notes ?? 'Disetujui oleh Kasi Perizinan',
         ]);
 
         return redirect()->route('kasi.dashboard')

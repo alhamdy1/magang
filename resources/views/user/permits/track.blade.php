@@ -47,7 +47,7 @@
         $stages = [
             ['status' => 'submitted', 'label' => 'Pengajuan', 'icon' => '📝'],
             ['status' => 'operator', 'label' => 'Review Operator', 'icon' => '👤'],
-            ['status' => 'kasi', 'label' => 'Review Kasi Perijinan', 'icon' => '👨‍💼'],
+            ['status' => 'kasi', 'label' => 'Review Kasi Perizinan', 'icon' => '👨‍💼'],
             ['status' => 'kabid', 'label' => 'Review Kabid Penyelenggaraan', 'icon' => '🏢'],
             ['status' => 'completed', 'label' => 'Selesai', 'icon' => '✅'],
         ];

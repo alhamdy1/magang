@@ -1,59 +1,125 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Sistem Perizinan Reklame Online
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistem manajemen perizinan reklame online berbasis Laravel yang memungkinkan pengajuan izin reklame secara online dengan alur persetujuan hierarkis.
 
-## About Laravel
+## Fitur Utama
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Alur Perizinan
+1. **User (Pemohon)** mengajukan permohonan izin reklame dengan mengisi formulir dan mengunggah dokumen
+2. **Operator** mereview permohonan (dengan sistem klaim untuk menghindari pengecekan duplikat)
+3. **Kasi Perizinan** mereview permohonan yang sudah disetujui operator
+4. **Kabid Penyelenggaraan** memberikan persetujuan final dan menerbitkan nomor izin
+5. **Pemohon** dapat melacak status permohonan secara real-time
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Data Permohonan
+- Nama/Badan/Organisasi
+- Alamat
+- Nomor Telepon
+- Klasifikasi (Permanen/Non Permanen)
+- Ukuran/Jumlah
+- Narasi
+- Lokasi GPS presisi (menggunakan peta interaktif Leaflet.js)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Dokumen yang Diunggah
+- Foto Kopi KTP Berwarna
+- Foto Copy NPWP Berwarna
+- Foto Copy Akte Pendirian
+- Foto Copy Retribusi Pajak Reklame
+- Data Isian Pemohon
+- Surat Pernyataan Pertanggung Jawaban Konstruksi
+- Foto Kondisi dan Gambar Tampilan Visualisasi Reklame
+- Gambar Konstruksi Bidangan
+- Surat Permohonan Izin
+- Surat Kuasa (Opsional)
 
-## Learning Laravel
+## Instalasi
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### Persyaratan
+- PHP >= 8.2
+- Composer
+- SQLite/MySQL/PostgreSQL
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Langkah Instalasi
 
-## Laravel Sponsors
+1. Clone repository
+```bash
+git clone https://github.com/alhamdy1/magang.git
+cd magang
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+2. Install dependencies
+```bash
+composer install
+```
 
-### Premium Partners
+3. Copy file environment
+```bash
+cp .env.example .env
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+4. Generate application key
+```bash
+php artisan key:generate
+```
 
-## Contributing
+5. Buat database dan jalankan migrasi
+```bash
+touch database/database.sqlite
+php artisan migrate --seed
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+6. Buat symbolic link untuk storage
+```bash
+php artisan storage:link
+```
 
-## Code of Conduct
+7. Jalankan server
+```bash
+php artisan serve
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+8. Akses aplikasi di `http://localhost:8000`
 
-## Security Vulnerabilities
+## Akun Default
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | admin@perizinan.com | password |
+| Kabid | kabid@perizinan.com | password |
+| Kasi | kasi@perizinan.com | password |
+| Operator 1 | operator1@perizinan.com | password |
+| Operator 2 | operator2@perizinan.com | password |
+| User | user@perizinan.com | password |
+
+## Teknologi
+
+- **Framework**: Laravel 11
+- **Database**: SQLite (default), MySQL/PostgreSQL (supported)
+- **CSS**: Tailwind CSS (via CDN)
+- **Maps**: Leaflet.js untuk pemilihan lokasi GPS
+
+## Struktur Approval
+
+```
+User (Pengajuan)
+    ↓
+Operator (Review + Claim System)
+    ↓
+Kasi Perizinan (Review)
+    ↓
+Kabid Penyelenggaraan (Final Approval)
+    ↓
+Selesai (Nomor Izin Diterbitkan)
+```
+
+## Sistem Klaim Operator
+
+Untuk mencegah beberapa operator mereview satu permohonan yang sama, sistem ini menggunakan mekanisme klaim dengan database locking:
+
+1. Operator harus "mengambil" permohonan sebelum mereview
+2. Permohonan yang sudah diambil tidak dapat diambil oleh operator lain
+3. Operator dapat "melepaskan" permohonan jika tidak jadi mereview
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+MIT License

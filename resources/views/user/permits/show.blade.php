@@ -145,7 +145,7 @@
         @endif
         @if($permit->kasi_notes)
         <div class="p-4 bg-orange-50 rounded-lg">
-            <p class="text-sm font-medium text-orange-800">Catatan Kasi Perijinan:</p>
+            <p class="text-sm font-medium text-orange-800">Catatan Kasi Perizinan:</p>
             <p class="text-sm text-gray-700 mt-1">{{ $permit->kasi_notes }}</p>
         </div>
         @endif

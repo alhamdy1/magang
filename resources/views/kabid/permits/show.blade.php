@@ -22,7 +22,7 @@
 <!-- Status Info -->
 <div class="mb-6 p-4 rounded-lg bg-green-100 border border-green-400">
     <p class="text-sm text-green-800">
-        <strong>Status:</strong> Sudah disetujui oleh Operator dan Kasi Perijinan
+        <strong>Status:</strong> Sudah disetujui oleh Operator dan Kasi Perizinan
         @if($permit->operator_notes)
             <br><strong>Catatan Operator:</strong> {{ $permit->operator_notes }}
         @endif

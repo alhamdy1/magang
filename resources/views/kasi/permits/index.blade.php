@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Daftar Permohonan - Kasi Perijinan')
+@section('title', 'Daftar Permohonan - Kasi Perizinan')
 
 @section('content')
 <div class="mb-8">

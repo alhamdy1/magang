@@ -5,7 +5,7 @@
 @section('content')
 <div class="mb-8">
     <h1 class="text-2xl font-bold text-gray-900">Permohonan untuk Review Final</h1>
-    <p class="text-gray-600">Permohonan yang sudah disetujui oleh Kasi Perijinan</p>
+    <p class="text-gray-600">Permohonan yang sudah disetujui oleh Kasi Perizinan</p>
 </div>
 
 <div class="bg-white rounded-lg shadow overflow-hidden">

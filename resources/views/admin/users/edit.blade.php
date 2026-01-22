@@ -46,7 +46,7 @@
                 class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('role') border-red-500 @enderror">
                 <option value="user" {{ old('role', $user->role) === 'user' ? 'selected' : '' }}>User (Pemohon)</option>
                 <option value="operator" {{ old('role', $user->role) === 'operator' ? 'selected' : '' }}>Operator</option>
-                <option value="kasi" {{ old('role', $user->role) === 'kasi' ? 'selected' : '' }}>Kasi Perijinan</option>
+                <option value="kasi" {{ old('role', $user->role) === 'kasi' ? 'selected' : '' }}>Kasi Perizinan</option>
                 <option value="kabid" {{ old('role', $user->role) === 'kabid' ? 'selected' : '' }}>Kabid Penyelenggaraan</option>
                 <option value="admin" {{ old('role', $user->role) === 'admin' ? 'selected' : '' }}>Admin</option>
             </select>

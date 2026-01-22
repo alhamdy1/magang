@@ -55,7 +55,7 @@ class ApprovalHistory extends Model
         return match($this->level) {
             'user' => 'Pemohon',
             'operator' => 'Operator',
-            'kasi' => 'Kasi Perijinan',
+            'kasi' => 'Kasi Perizinan',
             'kabid' => 'Kabid Penyelenggaraan',
             default => $this->level,
         };

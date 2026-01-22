@@ -163,7 +163,7 @@ class PermitController extends Controller
         ]);
 
         return redirect()->route('operator.dashboard')
-            ->with('success', 'Permohonan berhasil disetujui dan diteruskan ke Kasi Perijinan.');
+            ->with('success', 'Permohonan berhasil disetujui dan diteruskan ke Kasi Perizinan.');
     }
 
     /**

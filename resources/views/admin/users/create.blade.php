@@ -46,7 +46,7 @@
                 <option value="">Pilih Role</option>
                 <option value="user" {{ old('role') === 'user' ? 'selected' : '' }}>User (Pemohon)</option>
                 <option value="operator" {{ old('role') === 'operator' ? 'selected' : '' }}>Operator</option>
-                <option value="kasi" {{ old('role') === 'kasi' ? 'selected' : '' }}>Kasi Perijinan</option>
+                <option value="kasi" {{ old('role') === 'kasi' ? 'selected' : '' }}>Kasi Perizinan</option>
                 <option value="kabid" {{ old('role') === 'kabid' ? 'selected' : '' }}>Kabid Penyelenggaraan</option>
                 <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Admin</option>
             </select>
