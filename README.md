@@ -32,11 +32,12 @@ Sistem manajemen perizinan reklame online berbasis Laravel yang memungkinkan pen
 - Surat Permohonan Izin
 - Surat Kuasa (Opsional)
 
-## Instalasi
+## Instalasi Lokal
 
 ### Persyaratan
 - PHP >= 8.2
 - Composer
+- Node.js & NPM
 - SQLite/MySQL/PostgreSQL
 
 ### Langkah Instalasi
@@ -50,6 +51,7 @@ cd magang
 2. Install dependencies
 ```bash
 composer install
+npm install
 ```
 
 3. Copy file environment
@@ -68,17 +70,144 @@ touch database/database.sqlite
 php artisan migrate --seed
 ```
 
-6. Buat symbolic link untuk storage
+6. Build assets frontend
+```bash
+npm run build
+```
+
+7. Buat symbolic link untuk storage
 ```bash
 php artisan storage:link
 ```
 
-7. Jalankan server
+8. Jalankan server
 ```bash
 php artisan serve
 ```
 
-8. Akses aplikasi di `http://localhost:8000`
+9. Akses aplikasi di `http://localhost:8000`
+
+---
+
+## 🚀 Deploy ke Railway (Free Tier)
+
+Railway menyediakan hosting gratis yang cocok untuk testing. Berikut langkah-langkah deploy:
+
+### Cara 1: Deploy Otomatis (Recommended)
+
+1. **Fork/Push Repository ke GitHub**
+   - Pastikan repository sudah ada di GitHub Anda
+
+2. **Buat Akun Railway**
+   - Kunjungi [railway.app](https://railway.app)
+   - Sign up menggunakan akun GitHub
+
+3. **Buat Project Baru**
+   - Klik "New Project"
+   - Pilih "Deploy from GitHub repo"
+   - Pilih repository `magang` Anda
+
+4. **Set Environment Variables**
+   
+   Di Railway Dashboard → Service → Variables, tambahkan:
+   ```
+   APP_NAME=Sistem Perizinan Reklame
+   APP_ENV=production
+   APP_DEBUG=false
+   APP_KEY=base64:xxxxx (generate dengan: php artisan key:generate --show)
+   APP_LOCALE=id
+   APP_TIMEZONE=Asia/Jakarta
+   
+   DB_CONNECTION=sqlite
+   
+   SESSION_DRIVER=database
+   CACHE_STORE=database
+   QUEUE_CONNECTION=database
+   
+   LOG_CHANNEL=stack
+   LOG_LEVEL=error
+   ```
+
+5. **Generate APP_KEY**
+   - Jalankan lokal: `php artisan key:generate --show`
+   - Copy hasilnya ke variabel `APP_KEY` di Railway
+
+6. **Deploy**
+   - Railway akan otomatis build dan deploy
+   - Setelah selesai, klik "Generate Domain" untuk mendapat URL publik
+
+### Cara 2: Dengan PostgreSQL Database (Production Ready)
+
+Untuk production, gunakan PostgreSQL:
+
+1. Di Railway Dashboard, klik "+ New" → "Database" → "Add PostgreSQL"
+
+2. Update Environment Variables:
+   ```
+   DB_CONNECTION=pgsql
+   DATABASE_URL=${{Postgres.DATABASE_URL}}
+   ```
+
+3. Railway akan otomatis menghubungkan ke database
+
+### File Konfigurasi Railway
+
+Repository ini sudah dilengkapi dengan:
+- `Dockerfile` - Konfigurasi container Docker
+- `railway.json` - Pengaturan deploy Railway
+- `nixpacks.toml` - Alternatif konfigurasi Nixpacks
+- `Procfile` - Command untuk menjalankan aplikasi
+- `railway-start.sh` - Script startup dengan migrasi otomatis
+- `.env.railway.example` - Contoh variabel environment untuk Railway
+
+### Catatan Penting Railway Free Tier
+
+- **$5 kredit gratis per bulan** - cukup untuk testing
+- **Sleep setelah idle** - Aplikasi akan sleep jika tidak diakses
+- **Database SQLite** - Untuk testing (data reset saat redeploy)
+- **PostgreSQL** - Gunakan untuk data persisten
+
+---
+
+## 🏛️ Deploy ke Hosting Pemerintahan
+
+Untuk production di hosting pemerintahan, Anda mungkin perlu:
+
+1. **Pastikan environment production**
+   ```
+   APP_ENV=production
+   APP_DEBUG=false
+   ```
+
+2. **Gunakan database yang disediakan** (MySQL/PostgreSQL)
+   ```
+   DB_CONNECTION=mysql
+   DB_HOST=your-host
+   DB_PORT=3306
+   DB_DATABASE=your-database
+   DB_USERNAME=your-username
+   DB_PASSWORD=your-password
+   ```
+
+3. **Jalankan optimasi**
+   ```bash
+   php artisan config:cache
+   php artisan route:cache
+   php artisan view:cache
+   ```
+
+4. **Setup storage link**
+   ```bash
+   php artisan storage:link
+   ```
+
+5. **Jalankan migrasi dan seeder**
+   ```bash
+   php artisan migrate --force
+   php artisan db:seed --force
+   ```
+
+---
 
 ## Akun Default
 
@@ -91,11 +220,13 @@ php artisan serve
 | Operator 2 | operator2@perizinan.com | password |
 | User | user@perizinan.com | password |
 
+> ⚠️ **PENTING**: Ubah password semua akun default sebelum production!
+
 ## Teknologi
 
-- **Framework**: Laravel 11
+- **Framework**: Laravel 12
 - **Database**: SQLite (default), MySQL/PostgreSQL (supported)
-- **CSS**: Tailwind CSS (via CDN)
+- **CSS**: Tailwind CSS
 - **Maps**: Leaflet.js untuk pemilihan lokasi GPS
 
 ## Struktur Approval
