@@ -1,0 +1,32 @@
+# Nixpacks configuration for Railway
+# This is an alternative to Dockerfile
+
+[phases.setup]
+nixPkgs = [
+    'php82',
+    'php82Extensions.pdo',
+    'php82Extensions.pdo_pgsql',
+    'php82Extensions.pdo_sqlite',
+    'php82Extensions.mbstring',
+    'php82Extensions.gd',
+    'php82Extensions.xml',
+    'php82Extensions.bcmath',
+    'nodejs-18_x',
+    'npm-9_x'
+]
+
+[phases.install]
+cmds = [
+    'composer install --no-dev --optimize-autoloader --no-interaction',
+    'npm ci --production=false',
+    'npm run build'
+]
+
+[phases.build]
+cmds = [
+    'mkdir -p storage/framework/{sessions,views,cache} storage/logs bootstrap/cache',
+    'chmod -R 775 storage bootstrap/cache'
+]
+
+[start]
+cmd = './railway-start.sh'
