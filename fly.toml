@@ -1,0 +1,43 @@
+# fly.toml - Fly.io Application Configuration
+# Deploy with: fly launch --copy-config
+# Then: fly deploy
+
+app = "sistem-perizinan-reklame"
+primary_region = "sin"  # Singapore
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  APP_NAME = "Sistem Perizinan Reklame"
+  APP_ENV = "production"
+  APP_DEBUG = "false"
+  APP_LOCALE = "id"
+  APP_TIMEZONE = "Asia/Jakarta"
+  DB_CONNECTION = "sqlite"
+  SESSION_DRIVER = "database"
+  CACHE_STORE = "database"
+  QUEUE_CONNECTION = "database"
+  LOG_CHANNEL = "stack"
+  LOG_LEVEL = "error"
+  PORT = "8080"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+[[http_service.checks]]
+  grace_period = "60s"
+  interval = "30s"
+  method = "GET"
+  timeout = "10s"
+  path = "/up"
+
+[[vm]]
+  memory = "256mb"
+  cpu_kind = "shared"
+  cpus = 1

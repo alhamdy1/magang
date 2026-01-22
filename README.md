@@ -89,32 +89,181 @@ php artisan serve
 
 ---
 
-## 🚀 Deploy ke Railway (Free Tier)
+## 🚀 Opsi Deploy untuk Testing (Free Tier)
 
-Railway menyediakan hosting gratis yang cocok untuk testing. Berikut langkah-langkah deploy:
+> ⚠️ **Catatan Penting tentang Netlify**: Netlify adalah platform untuk static sites dan serverless functions yang **tidak mendukung PHP/Laravel** secara native. Untuk aplikasi Laravel full-stack seperti ini, gunakan salah satu platform berikut:
 
-### Cara 1: Deploy Otomatis (Recommended)
+### Pilihan Platform (Rekomendasi)
+
+| Platform | Free Tier | Kelebihan |
+|----------|-----------|-----------|
+| **Render.com** | ✅ 750 jam/bulan | Mudah setup, GitHub integration, cocok untuk testing |
+| **Fly.io** | ✅ 3 VM gratis | Performa bagus, global deployment |
+| **Railway** | ⚠️ $5 kredit | Tidak ada free tier lagi, berbayar |
+
+---
+
+## 🌐 Deploy ke Render.com (Recommended untuk Testing)
+
+Render.com adalah platform cloud yang menyediakan free tier untuk testing Laravel applications.
+
+### Cara 1: Deploy Otomatis dengan Blueprint
 
 1. **Fork/Push Repository ke GitHub**
    - Pastikan repository sudah ada di GitHub Anda
 
-2. **Buat Akun Railway**
+2. **Buat Akun Render.com**
+   - Kunjungi [render.com](https://render.com)
+   - Sign up menggunakan akun GitHub
+
+3. **Deploy dengan Blueprint**
+   - Klik "New" → "Blueprint"
+   - Connect repository GitHub Anda
+   - Render akan membaca file `render.yaml` dan setup otomatis
+
+4. **Generate APP_KEY**
+   - Jalankan lokal: `php artisan key:generate --show`
+   - Tambahkan sebagai Environment Variable di Render Dashboard:
+     ```
+     APP_KEY=base64:xxxxx
+     ```
+
+5. **Deploy**
+   - Render akan otomatis build dan deploy
+   - Setelah selesai, akses URL yang diberikan
+
+### Cara 2: Deploy Manual
+
+1. **Buat Web Service Baru**
+   - Klik "New" → "Web Service"
+   - Connect ke repository GitHub
+   - Runtime: Docker
+   - Region: Singapore (terdekat)
+
+2. **Set Environment Variables**
+   
+   Di Render Dashboard → Environment, tambahkan:
+   ```
+   APP_NAME=Sistem Perizinan Reklame
+   APP_ENV=production
+   APP_DEBUG=false
+   APP_KEY=base64:xxxxx
+   APP_LOCALE=id
+   APP_TIMEZONE=Asia/Jakarta
+   
+   DB_CONNECTION=sqlite
+   
+   SESSION_DRIVER=database
+   CACHE_STORE=database
+   QUEUE_CONNECTION=database
+   
+   LOG_CHANNEL=stack
+   LOG_LEVEL=error
+   PORT=8080
+   ```
+
+3. **Deploy**
+   - Klik "Create Web Service"
+   - Tunggu build selesai
+
+### File Konfigurasi Render.com
+
+Repository ini sudah dilengkapi dengan:
+- `render.yaml` - Blueprint untuk auto-deploy
+- `.env.render.example` - Contoh variabel environment
+- `render-start.sh` - Script startup khusus Render
+- `Dockerfile` - Konfigurasi container Docker
+
+### Catatan Penting Render.com Free Tier
+
+- **750 jam gratis per bulan** - Cukup untuk 1 instance 24/7
+- **Auto-sleep setelah 15 menit idle** - Aplikasi akan sleep jika tidak diakses
+- **Cold start ~30 detik** - Pertama kali akses setelah sleep agak lambat
+- **Database SQLite** - Data akan reset saat redeploy
+- **Untuk data persisten** - Gunakan Render PostgreSQL (berbayar)
+
+---
+
+## ✈️ Deploy ke Fly.io (Alternatif)
+
+Fly.io adalah platform yang menawarkan 3 VM gratis dengan performa bagus.
+
+### Langkah Deploy
+
+1. **Install Fly CLI**
+   ```bash
+   # macOS
+   brew install flyctl
+   
+   # Windows
+   powershell -Command "iwr https://fly.io/install.ps1 -useb | iex"
+   
+   # Linux
+   curl -L https://fly.io/install.sh | sh
+   ```
+
+2. **Login ke Fly.io**
+   ```bash
+   fly auth login
+   ```
+
+3. **Deploy Aplikasi**
+   ```bash
+   # Di folder repository
+   fly launch --copy-config
+   
+   # Set APP_KEY
+   fly secrets set APP_KEY=base64:xxxxx
+   
+   # Deploy
+   fly deploy
+   ```
+
+4. **Akses Aplikasi**
+   ```bash
+   fly open
+   ```
+
+### File Konfigurasi Fly.io
+
+Repository ini sudah dilengkapi dengan:
+- `fly.toml` - Konfigurasi Fly.io
+- `.env.fly.example` - Contoh variabel environment
+
+### Catatan Penting Fly.io Free Tier
+
+- **3 VM gratis** - Shared CPU, 256MB RAM
+- **Auto-scale ke 0** - Hemat resources saat tidak digunakan
+- **Global deployment** - Deploy ke region terdekat
+- **Database SQLite** - Data akan reset saat redeploy
+
+---
+
+## 🚂 Deploy ke Railway (Berbayar)
+
+> ⚠️ **Catatan**: Railway sudah tidak menyediakan free tier. Minimum $5/bulan.
+
+Railway masih bisa digunakan jika Anda bersedia membayar. Berikut langkah-langkahnya:
+
+### Cara Deploy
+
+1. **Buat Akun Railway**
    - Kunjungi [railway.app](https://railway.app)
    - Sign up menggunakan akun GitHub
 
-3. **Buat Project Baru**
+2. **Buat Project Baru**
    - Klik "New Project"
    - Pilih "Deploy from GitHub repo"
-   - Pilih repository `magang` Anda
+   - Pilih repository ini
 
-4. **Set Environment Variables**
+3. **Set Environment Variables**
    
    Di Railway Dashboard → Service → Variables, tambahkan:
    ```
    APP_NAME=Sistem Perizinan Reklame
    APP_ENV=production
    APP_DEBUG=false
-   APP_KEY=base64:xxxxx (generate dengan: php artisan key:generate --show)
+   APP_KEY=base64:xxxxx
    APP_LOCALE=id
    APP_TIMEZONE=Asia/Jakarta
    
@@ -128,44 +277,17 @@ Railway menyediakan hosting gratis yang cocok untuk testing. Berikut langkah-lan
    LOG_LEVEL=error
    ```
 
-5. **Generate APP_KEY**
-   - Jalankan lokal: `php artisan key:generate --show`
-   - Copy hasilnya ke variabel `APP_KEY` di Railway
-
-6. **Deploy**
+4. **Deploy**
    - Railway akan otomatis build dan deploy
-   - Setelah selesai, klik "Generate Domain" untuk mendapat URL publik
-
-### Cara 2: Dengan PostgreSQL Database (Production Ready)
-
-Untuk production, gunakan PostgreSQL:
-
-1. Di Railway Dashboard, klik "+ New" → "Database" → "Add PostgreSQL"
-
-2. Update Environment Variables:
-   ```
-   DB_CONNECTION=pgsql
-   DATABASE_URL=${{Postgres.DATABASE_URL}}
-   ```
-
-3. Railway akan otomatis menghubungkan ke database
 
 ### File Konfigurasi Railway
 
 Repository ini sudah dilengkapi dengan:
-- `Dockerfile` - Konfigurasi container Docker
 - `railway.json` - Pengaturan deploy Railway
 - `nixpacks.toml` - Alternatif konfigurasi Nixpacks
 - `Procfile` - Command untuk menjalankan aplikasi
 - `railway-start.sh` - Script startup dengan migrasi otomatis
-- `.env.railway.example` - Contoh variabel environment untuk Railway
-
-### Catatan Penting Railway Free Tier
-
-- **$5 kredit gratis per bulan** - cukup untuk testing
-- **Sleep setelah idle** - Aplikasi akan sleep jika tidak diakses
-- **Database SQLite** - Untuk testing (data reset saat redeploy)
-- **PostgreSQL** - Gunakan untuk data persisten
+- `.env.railway.example` - Contoh variabel environment
 
 ---
 

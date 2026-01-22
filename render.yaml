@@ -1,0 +1,40 @@
+# Render.com Blueprint Configuration
+# Deploy to Render.com with "New" > "Blueprint" > Select this repo
+# Or manually create a Web Service and select Docker
+
+services:
+  - type: web
+    name: sistem-perizinan-reklame
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: singapore
+    healthCheckPath: /up
+    autoDeploy: true
+    envVars:
+      - key: APP_NAME
+        value: "Sistem Perizinan Reklame"
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        sync: false  # User must set this manually after deployment
+      - key: APP_LOCALE
+        value: id
+      - key: APP_TIMEZONE
+        value: Asia/Jakarta
+      - key: DB_CONNECTION
+        value: sqlite
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: LOG_CHANNEL
+        value: stack
+      - key: LOG_LEVEL
+        value: error
+      - key: PORT
+        value: "8080"
