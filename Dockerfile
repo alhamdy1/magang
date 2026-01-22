@@ -1,4 +1,5 @@
-# Dockerfile untuk Laravel di Railway
+# Dockerfile untuk Laravel 
+# Supports: Railway, Render.com, Fly.io, dan platform Docker lainnya
 FROM php:8.2-cli
 
 # Install dependencies
@@ -56,10 +57,11 @@ RUN touch database/database.sqlite
 
 # Set proper permissions
 RUN chmod -R 775 storage bootstrap/cache database
-RUN chmod +x railway-start.sh
+RUN chmod +x railway-start.sh render-start.sh
 
 # Expose port
 EXPOSE ${PORT:-8080}
 
 # Start command using startup script
+# Works with Railway, Render.com, Fly.io, and other Docker-based platforms
 CMD ["./railway-start.sh"]
