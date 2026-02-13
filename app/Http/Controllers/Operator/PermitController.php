@@ -6,12 +6,20 @@ use App\Http\Controllers\Controller;
 use App\Models\ApprovalHistory;
 use App\Models\Document;
 use App\Models\Permit;
+use App\Services\PermitNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class PermitController extends Controller
 {
+    protected PermitNotificationService $notificationService;
+
+    public function __construct(PermitNotificationService $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
+
     /**
      * Display list of available permits for operators.
      */
@@ -180,6 +188,8 @@ class PermitController extends Controller
             'notes' => 'required|string|max:1000',
         ]);
 
+        $oldStatus = $permit->status;
+
         $permit->update([
             'status' => 'operator_rejected',
             'operator_notes' => $request->notes,
@@ -194,6 +204,11 @@ class PermitController extends Controller
             'new_status' => 'operator_rejected',
             'notes' => $request->notes,
         ]);
+
+        // Send notification email
+        $this->notificationService->sendStatusUpdateNotification(
+            $permit, $oldStatus, 'operator_rejected', $request->notes
+        );
 
         return redirect()->route('operator.dashboard')
             ->with('success', 'Permohonan berhasil ditolak.');

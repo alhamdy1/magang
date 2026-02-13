@@ -6,11 +6,19 @@ use App\Http\Controllers\Controller;
 use App\Models\ApprovalHistory;
 use App\Models\Document;
 use App\Models\Permit;
+use App\Services\PermitNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PermitController extends Controller
 {
+    protected PermitNotificationService $notificationService;
+
+    public function __construct(PermitNotificationService $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
+
     /**
      * Display list of permits pending Kabid review.
      */
@@ -67,6 +75,8 @@ class PermitController extends Controller
             'notes' => 'nullable|string|max:1000',
         ]);
 
+        $oldStatus = $permit->status;
+
         // Generate permit number when fully approved
         $permitNumber = Permit::generatePermitNumber();
 
@@ -86,6 +96,11 @@ class PermitController extends Controller
             'notes' => $request->notes ?? 'Disetujui oleh Kabid Penyelenggaraan. Nomor Izin: ' . $permitNumber,
         ]);
 
+        // Send notification email for approved permit
+        $this->notificationService->sendStatusUpdateNotification(
+            $permit, $oldStatus, 'approved', 'Permohonan izin reklame Anda telah disetujui. Nomor Izin: ' . $permitNumber
+        );
+
         return redirect()->route('kabid.dashboard')
             ->with('success', 'Permohonan berhasil disetujui. Nomor Izin: ' . $permitNumber);
     }
@@ -103,6 +118,8 @@ class PermitController extends Controller
             'notes' => 'required|string|max:1000',
         ]);
 
+        $oldStatus = $permit->status;
+
         $permit->update([
             'status' => 'kabid_rejected',
             'kabid_notes' => $request->notes,
@@ -117,6 +134,11 @@ class PermitController extends Controller
             'new_status' => 'kabid_rejected',
             'notes' => $request->notes,
         ]);
+
+        // Send notification email
+        $this->notificationService->sendStatusUpdateNotification(
+            $permit, $oldStatus, 'rejected', $request->notes
+        );
 
         return redirect()->route('kabid.dashboard')
             ->with('success', 'Permohonan berhasil ditolak.');

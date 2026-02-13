@@ -42,6 +42,15 @@ Sistem manajemen perizinan reklame online berbasis Laravel yang memungkinkan pen
 
 ### Langkah Instalasi
 
+#### Opsi 1: Quick Setup (Recommended)
+```bash
+git clone https://github.com/alhamdy1/magang.git
+cd magang
+composer setup  # Install semua dan setup otomatis
+php artisan serve
+```
+
+#### Opsi 2: Manual Setup
 1. Clone repository
 ```bash
 git clone https://github.com/alhamdy1/magang.git
@@ -75,9 +84,9 @@ php artisan migrate --seed
 npm run build
 ```
 
-7. Buat symbolic link untuk storage
+7. Set storage permissions
 ```bash
-php artisan storage:link
+chmod -R 775 storage bootstrap/cache
 ```
 
 8. Jalankan server
@@ -86,6 +95,34 @@ php artisan serve
 ```
 
 9. Akses aplikasi di `http://localhost:8000`
+
+### 🐙 GitHub Codespaces
+
+Untuk development di cloud tanpa install apapun:
+
+1. Buka repository di GitHub
+2. Klik **Code** → **Codespaces** → **Create codespace on main**
+3. Tunggu codespace ready (auto-install dependencies)
+4. Di terminal, jalankan:
+   ```bash
+   ./fix-server.sh
+   # atau
+   php artisan serve --host=0.0.0.0 --port=8000
+   ```
+5. Tunggu notifikasi port forwarding, klik **"Open in Browser"**
+6. Atau buka **PORTS** tab dan klik icon globe pada port 8000
+
+**Troubleshooting di Codespaces:**
+- Jika dapat HTTP 502: Tunggu 10 detik, refresh browser
+- Jika server crash: Jalankan `./fix-server.sh`
+- Lihat [TROUBLESHOOTING.md](TROUBLESHOOTING.md) untuk detail
+
+### 📚 Dokumentasi Testing
+
+- **[TEST_GUIDE.md](TEST_GUIDE.md)** - Panduan testing lengkap dengan skenario
+- **[QUICK_START.txt](QUICK_START.txt)** - Quick reference card
+- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - Solusi masalah umum
+- **[dev.sh](dev.sh)** - Script helper untuk development
 
 ---
 

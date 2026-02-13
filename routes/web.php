@@ -4,6 +4,8 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PermitController;
+use App\Http\Controllers\TrackingController;
+use App\Http\Controllers\Guest\PermitController as GuestPermitController;
 use App\Http\Controllers\Operator\PermitController as OperatorPermitController;
 use App\Http\Controllers\Kasi\PermitController as KasiPermitController;
 use App\Http\Controllers\Kabid\PermitController as KabidPermitController;
@@ -15,12 +17,27 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-// Guest routes (login/register)
-Route::middleware('guest')->group(function () {
+// Public tracking routes (accessible by anyone) - with rate limiting
+Route::prefix('tracking')->name('tracking.')->middleware('throttle:30,1')->group(function () {
+    Route::get('/', [TrackingController::class, 'index'])->name('index');
+    Route::post('/search', [TrackingController::class, 'search'])->name('search');
+    Route::get('/{trackingNumber}', [TrackingController::class, 'show'])->name('show');
+    Route::post('/{trackingNumber}/verify', [TrackingController::class, 'verify'])->name('verify');
+});
+
+// Guest permit submission (without login) - with rate limiting to prevent abuse
+Route::prefix('guest')->name('guest.')->middleware('throttle:10,1')->group(function () {
+    Route::get('/permits/create', [GuestPermitController::class, 'create'])->name('permits.create');
+    Route::post('/permits', [GuestPermitController::class, 'store'])->middleware('throttle:5,60')->name('permits.store');
+    Route::get('/permits/success', [GuestPermitController::class, 'success'])->name('permits.success');
+});
+
+// Auth routes (login/register) - with rate limiting to prevent brute force
+Route::middleware(['guest', 'throttle:10,1'])->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [LoginController::class, 'login']);
+    Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:5,1');
     Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
-    Route::post('/register', [RegisterController::class, 'register']);
+    Route::post('/register', [RegisterController::class, 'register'])->middleware('throttle:3,1');
 });
 
 // Logout route

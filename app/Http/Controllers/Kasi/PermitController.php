@@ -6,11 +6,19 @@ use App\Http\Controllers\Controller;
 use App\Models\ApprovalHistory;
 use App\Models\Document;
 use App\Models\Permit;
+use App\Services\PermitNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PermitController extends Controller
 {
+    protected PermitNotificationService $notificationService;
+
+    public function __construct(PermitNotificationService $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
+
     /**
      * Display list of permits pending Kasi review.
      */
@@ -99,6 +107,8 @@ class PermitController extends Controller
             'notes' => 'required|string|max:1000',
         ]);
 
+        $oldStatus = $permit->status;
+
         $permit->update([
             'status' => 'kasi_rejected',
             'kasi_notes' => $request->notes,
@@ -113,6 +123,11 @@ class PermitController extends Controller
             'new_status' => 'kasi_rejected',
             'notes' => $request->notes,
         ]);
+
+        // Send notification email
+        $this->notificationService->sendStatusUpdateNotification(
+            $permit, $oldStatus, 'kasi_rejected', $request->notes
+        );
 
         return redirect()->route('kasi.dashboard')
             ->with('success', 'Permohonan berhasil ditolak.');

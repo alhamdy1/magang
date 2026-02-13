@@ -2,21 +2,36 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StorePermitRequest;
 use App\Models\ApprovalHistory;
 use App\Models\Document;
 use App\Models\Permit;
+use App\Services\PermitNotificationService;
+use App\Services\SecureFileUploadService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PermitController extends Controller
 {
+    protected PermitNotificationService $notificationService;
+    protected SecureFileUploadService $fileUploadService;
+
+    public function __construct(
+        PermitNotificationService $notificationService,
+        SecureFileUploadService $fileUploadService
+    ) {
+        $this->notificationService = $notificationService;
+        $this->fileUploadService = $fileUploadService;
+    }
+
     /**
      * Display user's permits list.
      */
     public function index()
     {
-        $permits = Permit::where('user_id', Auth::id())
+        $permits = Permit::forUser(Auth::id())
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
@@ -35,79 +50,89 @@ class PermitController extends Controller
     /**
      * Store a new permit application.
      */
-    public function store(Request $request)
+    public function store(StorePermitRequest $request)
     {
-        $request->validate([
-            'nama_pemohon' => 'required|string|max:255',
-            'alamat' => 'required|string',
-            'nomor_telepon' => 'required|string|max:20',
-            'klasifikasi' => 'required|in:permanen,non_permanen',
-            'ukuran_jumlah' => 'required|string|max:255',
-            'narasi' => 'required|string',
-            'lokasi_alamat' => 'required|string',
-            'latitude' => 'required|numeric|between:-90,90',
-            'longitude' => 'required|numeric|between:-180,180',
-            // Document validations
-            'ktp' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
-            'npwp' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
-            'akte_pendirian' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
-            'retribusi_pajak' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
-            'data_pemohon' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
-            'surat_pernyataan' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
-            'foto_kondisi' => 'required|file|mimes:jpg,jpeg,png,pdf|max:10240',
-            'gambar_konstruksi' => 'required|file|mimes:jpg,jpeg,png,pdf|max:10240',
-            'surat_permohonan' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
-            'surat_kuasa' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
-        ]);
+        $validated = $request->validated();
 
-        // Create permit
-        $permit = Permit::create([
-            'user_id' => Auth::id(),
-            'nama_pemohon' => $request->nama_pemohon,
-            'alamat' => $request->alamat,
-            'nomor_telepon' => $request->nomor_telepon,
-            'klasifikasi' => $request->klasifikasi,
-            'ukuran_jumlah' => $request->ukuran_jumlah,
-            'narasi' => $request->narasi,
-            'lokasi_alamat' => $request->lokasi_alamat,
-            'latitude' => $request->latitude,
-            'longitude' => $request->longitude,
-            'status' => 'submitted',
-        ]);
+        DB::beginTransaction();
 
-        // Upload documents
-        $documentTypes = ['ktp', 'npwp', 'akte_pendirian', 'retribusi_pajak', 'data_pemohon', 
-                         'surat_pernyataan', 'foto_kondisi', 'gambar_konstruksi', 'surat_permohonan', 'surat_kuasa'];
+        try {
+            // Create permit with tracking number
+            $permit = Permit::create([
+                'user_id' => Auth::id(),
+                'tracking_number' => Permit::generateTrackingNumber(),
+                'nama_pemohon' => $validated['nama_pemohon'],
+                'nik_pemohon' => $validated['nik_pemohon'],
+                'alamat' => $validated['alamat'],
+                'nomor_telepon' => $validated['nomor_telepon'],
+                'klasifikasi' => $validated['klasifikasi'],
+                'ukuran_jumlah' => $validated['ukuran_jumlah'],
+                'narasi' => $validated['narasi'],
+                'lokasi_alamat' => $validated['lokasi_alamat'],
+                'latitude' => $validated['latitude'],
+                'longitude' => $validated['longitude'],
+                'status' => 'submitted',
+            ]);
 
-        foreach ($documentTypes as $type) {
-            if ($request->hasFile($type)) {
-                $file = $request->file($type);
-                $path = $file->store('permits/' . $permit->id, 'public');
-                
-                Document::create([
-                    'permit_id' => $permit->id,
-                    'document_type' => $type,
-                    'file_path' => $path,
-                    'original_name' => $file->getClientOriginalName(),
-                    'mime_type' => $file->getMimeType(),
-                    'file_size' => $file->getSize(),
-                ]);
+            // Upload documents securely
+            $documentTypes = ['ktp', 'npwp', 'akte_pendirian', 'retribusi_pajak', 'data_pemohon', 
+                             'surat_pernyataan', 'foto_kondisi', 'gambar_konstruksi', 'surat_permohonan', 'surat_kuasa'];
+
+            foreach ($documentTypes as $type) {
+                if ($request->hasFile($type)) {
+                    $maxSize = in_array($type, ['foto_kondisi', 'gambar_konstruksi']) ? 10485760 : 5242880;
+                    $result = $this->fileUploadService->setMaxFileSize($maxSize)->upload(
+                        $request->file($type),
+                        'permits/' . $permit->id
+                    );
+                    
+                    if ($result) {
+                        Document::create([
+                            'permit_id' => $permit->id,
+                            'document_type' => $type,
+                            'file_path' => $result['path'],
+                            'original_name' => $result['original_name'],
+                            'mime_type' => $result['mime_type'],
+                            'file_size' => $result['size'],
+                        ]);
+                    }
+                }
             }
+
+            // Create approval history
+            ApprovalHistory::create([
+                'permit_id' => $permit->id,
+                'user_id' => Auth::id(),
+                'action' => 'submitted',
+                'level' => 'user',
+                'old_status' => null,
+                'new_status' => 'submitted',
+                'notes' => 'Permohonan diajukan',
+            ]);
+
+            DB::commit();
+
+            // Log successful submission
+            Log::channel('permits')->info('New permit submitted', [
+                'permit_id' => $permit->id,
+                'tracking_number' => $permit->tracking_number,
+                'user_id' => Auth::id(),
+            ]);
+
+            // Send email notification (outside transaction)
+            $this->notificationService->sendSubmittedNotification($permit);
+
+            return redirect()->route('user.permits.show', $permit)
+                ->with('success', 'Permohonan izin berhasil diajukan. Nomor tracking: ' . $permit->tracking_number);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Permit submission failed', [
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+            ]);
+            return back()->withInput()->with('error', 'Terjadi kesalahan saat mengajukan permohonan. Silakan coba lagi.');
         }
-
-        // Create approval history
-        ApprovalHistory::create([
-            'permit_id' => $permit->id,
-            'user_id' => Auth::id(),
-            'action' => 'submitted',
-            'level' => 'user',
-            'old_status' => null,
-            'new_status' => 'submitted',
-            'notes' => 'Permohonan diajukan',
-        ]);
-
-        return redirect()->route('user.permits.show', $permit)
-            ->with('success', 'Permohonan izin berhasil diajukan.');
     }
 
     /**

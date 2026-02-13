@@ -22,13 +22,19 @@ class RegisterController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'phone' => ['required', 'string', 'max:20'],
+            'nik' => ['required', 'string', 'size:16', 'regex:/^[0-9]+$/'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ], [
+            'nik.required' => 'NIK wajib diisi.',
+            'nik.size' => 'NIK harus 16 digit.',
+            'nik.regex' => 'NIK hanya boleh berisi angka.',
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
+            'nik' => $request->nik,
             'password' => Hash::make($request->password),
             'role' => 'user', // Default role for new registrations
         ]);

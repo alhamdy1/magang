@@ -127,6 +127,24 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
+        // Security audit log - for tracking authentication and sensitive actions
+        'security' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/security.log'),
+            'level' => 'info',
+            'days' => 90,
+            'replace_placeholders' => true,
+        ],
+
+        // Permit activity log
+        'permits' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/permits.log'),
+            'level' => 'info',
+            'days' => 365,
+            'replace_placeholders' => true,
+        ],
+
     ],
 
 ];

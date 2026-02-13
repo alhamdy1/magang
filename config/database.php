@@ -144,7 +144,7 @@ return [
 
     'redis' => [
 
-        'client' => env('REDIS_CLIENT', 'phpredis'),
+        'client' => env('REDIS_CLIENT', null), // Changed from 'phpredis' to null to disable Redis when not configured
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),

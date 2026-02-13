@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="description" content="Sistem Perizinan Reklame - Ajukan permohonan izin reklame secara online">
+    <meta name="theme-color" content="#2563eb">
     <title>@yield('title', 'Sistem Perizinan Reklame')</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -11,12 +13,33 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         [x-cloak] { display: none !important; }
+        /* Print styles */
+        @media print {
+            nav, footer, .no-print { display: none !important; }
+            main { padding: 0 !important; }
+            .print-break { page-break-before: always; }
+        }
+        /* Focus visible outline for accessibility */
+        :focus-visible {
+            outline: 2px solid #2563eb;
+            outline-offset: 2px;
+        }
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
     </style>
     @stack('styles')
 </head>
 <body class="bg-gray-100 min-h-screen">
+    {{-- Skip to Content Link for Accessibility --}}
+    @include('components.skip-link')
     <!-- Navigation -->
-    <nav class="bg-white shadow-lg">
+    <nav class="bg-white shadow-lg" role="navigation" aria-label="Navigasi utama">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex">
@@ -94,38 +117,39 @@
         </div>
     </nav>
 
-    <!-- Flash Messages -->
-    @if(session('success'))
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-            <span class="block sm:inline">{{ session('success') }}</span>
-        </div>
-    </div>
+    <!-- Flash Messages - Using Alert Component above -->
+    {{-- Keep old flash messages for backward compatibility --}}
+    @if(session('success') && !View::hasSection('no-duplicate-alert'))
+    {{-- Handled by @include('components.alert') --}}
     @endif
 
-    @if(session('error'))
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-            <span class="block sm:inline">{{ session('error') }}</span>
-        </div>
-    </div>
+    @if(session('error') && !View::hasSection('no-duplicate-alert'))
+    {{-- Handled by @include('components.alert') --}}
     @endif
 
     <!-- Main Content -->
-    <main class="py-6">
+    <main id="main-content" class="py-6" role="main" tabindex="-1">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {{-- Alert Component --}}
+            @include('components.alert')
             @yield('content')
         </div>
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t mt-8">
+    <footer class="bg-white border-t mt-8" role="contentinfo">
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <p class="text-center text-gray-500 text-sm">
                 &copy; {{ date('Y') }} Sistem Perizinan Reklame. All rights reserved.
             </p>
         </div>
     </footer>
+
+    {{-- Toast Notifications --}}
+    @include('components.toast')
+    
+    {{-- Loading Overlay --}}
+    @include('components.loading-overlay')
 
     <!-- Leaflet JS for maps -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
